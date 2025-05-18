@@ -5,6 +5,32 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function UnitTypeModule() {
   const { translations: t } = useLanguage();
+  
+  // BACKEND CONNECTION NEEDED: Fetch unit types from backend
+  // const [unitTypes, setUnitTypes] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  // 
+  // useEffect(() => {
+  //   const fetchUnitTypes = async () => {
+  //     try {
+  //       const propertyId = localStorage.getItem('selectedPropertyId');
+  //       const response = await fetch(`/api/properties/${propertyId}/unit-types`, {
+  //         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+  //       });
+  //       const data = await response.json();
+  //       if (data.success) {
+  //         setUnitTypes(data.unitTypes);
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to fetch unit types:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   
+  //   fetchUnitTypes();
+  // }, []);
+  
   const [unitTypes, setUnitTypes] = useState([
     { id: 1, name: '1+1', area: 65, sharePercentage: 5, monthlyFee: 150, description: 'Small apartment with one bedroom' },
     { id: 2, name: '2+1', area: 85, sharePercentage: 7, monthlyFee: 200, description: 'Medium apartment with two bedrooms' },

@@ -34,18 +34,22 @@ export default function RegisterPage() {
     }
     
     setLoading(true);
-
+  
     try {
-      // TODO: Connect to backend API
-      // This is where you would make an API call to your backend
+      // BACKEND CONNECTION NEEDED: Implement API call to register new user
       // const response = await fetch('/api/auth/register', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(formData),
       // });
+      // const data = await response.json();
+      // if (data.success) {
+      //   router.push('/auth/login');
+      // } else {
+      //   setError(data.message || 'Registration failed');
+      // }
       
       // For frontend demo purposes only (remove in production)
-      // Simulate successful registration
       setTimeout(() => {
         router.push('/auth/login');
       }, 1000);

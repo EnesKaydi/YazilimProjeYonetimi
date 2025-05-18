@@ -20,13 +20,7 @@ export default function Sidebar() {
 
   return (
     <div className="d-flex flex-column vh-100 position-fixed" style={{ width: 'inherit', maxWidth: 'inherit' }}>
-      {/* Logo and Title */}
-      <div className="p-3 border-bottom border-secondary">
-        <h4 className="text-center text-white mb-0">
-          <i className="bi bi-buildings me-2"></i>
-          {t.associationManagement}
-        </h4>
-      </div>
+      
 
       {/* User Profile Section */}
       <div className="p-3 border-bottom border-secondary">
@@ -39,7 +33,7 @@ export default function Sidebar() {
               <span className="text-truncate">{user?.name || 'User'}</span>
             </button>
             <ul className="dropdown-menu w-100" aria-labelledby="userDropdown">
-              <li><a className="dropdown-item" href="#"><i className="bi bi-person me-2"></i>{t.profile}</a></li>
+              <li><Link href="/profile" className="dropdown-item"><i className="bi bi-person me-2"></i>{t.profile}</Link></li>
               <li><hr className="dropdown-divider" /></li>
               <li><button className="dropdown-item text-danger" onClick={logout}><i className="bi bi-box-arrow-right me-2"></i>{t.logout}</button></li>
             </ul>
@@ -54,6 +48,12 @@ export default function Sidebar() {
           <Link href="/dashboard" className="nav-link text-white py-2 px-3 d-flex align-items-center">
             <i className="bi bi-speedometer2 me-3"></i>
             <span>{t.dashboard}</span>
+          </Link>
+
+          {/* Profile Management - Changed to Accounts */}
+          <Link href="/accounts" className="nav-link text-white py-2 px-3 d-flex align-items-center">
+            <i className="bi bi-people me-3"></i>
+            <span>{t.accounts || 'Accounts'}</span>
           </Link>
 
           {/* Settings */}

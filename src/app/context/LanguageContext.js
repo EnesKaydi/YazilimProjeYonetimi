@@ -26,6 +26,22 @@ const en = {
   haveAccount: 'Already have an account?',
   noAccount: 'Don\'t have an account?',
   
+  // Profile
+  profileManagement: 'Profile Management',
+  updateProfile: 'Update Profile',
+  changePassword: 'Change Password',
+  currentPassword: 'Current Password',
+  newPassword: 'New Password',
+  confirmNewPassword: 'Confirm New Password',
+  profileUpdated: 'Profile updated successfully',
+  passwordChanged: 'Password changed successfully',
+  profilePicture: 'Profile Picture',
+  uploadPicture: 'Upload Picture',
+  removePicture: 'Remove Picture',
+  personalInfo: 'Personal Information',
+  phoneNumber: 'Phone Number',
+  address: 'Address',
+  
   // Dashboard
   welcome: 'Welcome',
   dashboard: 'Dashboard',
@@ -203,6 +219,36 @@ const fr = {
   exceptionalBudget: 'Budget exceptionnel',
   reports: 'Rapports',
   documents: 'Documents',
+  
+  // Profile
+  profileManagement: 'Gestion du Profil',
+  updateProfile: 'Mettre à jour le profil',
+  changePassword: 'Changer le mot de passe',
+  currentPassword: 'Mot de passe actuel',
+  newPassword: 'Nouveau mot de passe',
+  confirmNewPassword: 'Confirmer le nouveau mot de passe',
+  profileUpdated: 'Profil mis à jour avec succès',
+  passwordChanged: 'Mot de passe changé avec succès',
+  profilePicture: 'Photo de profil',
+  uploadPicture: 'Télécharger une photo',
+  removePicture: 'Supprimer la photo',
+  personalInfo: 'Informations personnelles',
+  phoneNumber: 'Numéro de téléphone',
+  address: 'Adresse',
+  
+  // Accounts Management
+  accounts: 'Comptes',
+  accountsManagement: 'Gestion des Comptes',
+  userAccounts: 'Comptes Utilisateurs',
+  addNewUser: 'Ajouter un Utilisateur',
+  editUser: 'Modifier l\'Utilisateur',
+  role: 'Rôle',
+  lastLogin: 'Dernière Connexion',
+  accountId: 'ID du Compte',
+  noUsersYet: 'Aucun utilisateur ajouté',
+  addUsersDescription: 'Ajoutez des utilisateurs pour gérer leurs comptes',
+  confirmDeleteUser: 'Êtes-vous sûr de vouloir supprimer cet utilisateur?',
+  requiredFields: 'Le nom et l\'email sont requis',
   
   // Property Details Form
   propertyInfo: 'Informations sur la propriété',

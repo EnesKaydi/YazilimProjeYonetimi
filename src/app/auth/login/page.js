@@ -26,15 +26,20 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     try {
-      // TODO: Connect to backend API
-      // This is where you would make an API call to your backend
+      // BACKEND CONNECTION NEEDED: Implement API call to authenticate user
+      // Replace the mock authentication with actual backend call:
       // const response = await fetch('/api/auth/login', {
       //   method: 'POST',
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({ email, password }),
       // });
+      // const data = await response.json();
+      // if (data.success) {
+      //   login(data.user);
+      //   return;
+      // }
       
       // For frontend demo purposes only (remove in production)
       if (email === 'admin@example.com' && password === 'password') {

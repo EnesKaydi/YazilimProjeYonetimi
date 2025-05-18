@@ -5,6 +5,44 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function RegularBudgetModule({ property }) {
   const { translations: t } = useLanguage();
+  
+  // BACKEND CONNECTION NEEDED: Fetch budget data from backend
+  // const [budgetYear, setBudgetYear] = useState(new Date().getFullYear());
+  // const [budgetData, setBudgetData] = useState(null);
+  // const [loading, setLoading] = useState(true);
+  // 
+  // useEffect(() => {
+  //   const fetchBudgetData = async () => {
+  //     try {
+  //       const propertyId = property?.id || localStorage.getItem('selectedPropertyId');
+  //       const response = await fetch(`/api/properties/${propertyId}/budgets/${budgetYear}`, {
+  //         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+  //       });
+  //       const data = await response.json();
+  //       
+  //       if (data.success) {
+  //         setBudgetData(data.budget);
+  //       } else {
+  //         // Initialize empty budget if none exists
+  //         setBudgetData({
+  //           previousYearBalance: 0,
+  //           months: Array(12).fill().map((_, i) => ({
+  //             name: new Date(budgetYear, i).toLocaleString('default', { month: 'long' }),
+  //             income: 0,
+  //             outcome: 0
+  //           }))
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to fetch budget data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   
+  //   fetchBudgetData();
+  // }, [property, budgetYear]);
+  
   const [budgetYear, setBudgetYear] = useState(2025);
   const [budgetData, setBudgetData] = useState({
     previousYearBalance: 0,

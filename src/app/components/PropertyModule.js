@@ -19,7 +19,7 @@ export default function PropertyModules() {
   return (
     <div className="property-modules">
       {/* Modül Navigasyonu */}
-      <ul className="nav nav-tabs mb-4">
+      <ul className="nav nav-tabs mb-4 justify-content-center">
         <li className="nav-item">
           <button 
             className={`nav-link ${activeTab === 'details' ? 'active' : ''}`}
@@ -54,33 +54,6 @@ export default function PropertyModules() {
           >
             <i className="bi bi-cash-coin me-2"></i>
             {t.regularBudget}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button 
-            className={`nav-link ${activeTab === 'exceptional' ? 'active' : ''}`}
-            onClick={() => setActiveTab('exceptional')}
-          >
-            <i className="bi bi-cash-stack me-2"></i>
-            {t.exceptionalBudget}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button 
-            className={`nav-link ${activeTab === 'reports' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reports')}
-          >
-            <i className="bi bi-bar-chart me-2"></i>
-            {t.reports}
-          </button>
-        </li>
-        <li className="nav-item">
-          <button 
-            className={`nav-link ${activeTab === 'documents' ? 'active' : ''}`}
-            onClick={() => setActiveTab('documents')}
-          >
-            <i className="bi bi-file-earmark-text me-2"></i>
-            {t.documents}
           </button>
         </li>
       </ul>

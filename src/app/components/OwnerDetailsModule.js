@@ -6,6 +6,45 @@ import { useLanguage } from '../context/LanguageContext';
 export default function OwnerDetailsModule() {
   const { translations: t } = useLanguage();
   
+  // BACKEND CONNECTION NEEDED: Fetch unit types and owners from backend
+  // const [unitTypes, setUnitTypes] = useState([]);
+  // const [owners, setOwners] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  // 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const propertyId = localStorage.getItem('selectedPropertyId');
+  //       
+  //       // Fetch unit types
+  //       const unitTypesResponse = await fetch(`/api/properties/${propertyId}/unit-types`, {
+  //         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+  //       });
+  //       const unitTypesData = await unitTypesResponse.json();
+  //       
+  //       // Fetch owners
+  //       const ownersResponse = await fetch(`/api/properties/${propertyId}/owners`, {
+  //         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+  //       });
+  //       const ownersData = await ownersResponse.json();
+  //       
+  //       if (unitTypesData.success) {
+  //         setUnitTypes(unitTypesData.unitTypes);
+  //       }
+  //       
+  //       if (ownersData.success) {
+  //         setOwners(ownersData.owners);
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to fetch data:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   
+  //   fetchData();
+  // }, []);
+  
   // Sample unit types (in a real app, this would come from your UnitTypeModule)
   const [unitTypes, setUnitTypes] = useState([
     { id: 1, name: '1+1' },
