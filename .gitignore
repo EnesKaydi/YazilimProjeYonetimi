@@ -1,0 +1,23 @@
+# Node.js / React
+node_modules/
+.next/
+dist/
+out/
+
+# Java / Maven
+target/
+*.log
+
+# IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Sistem dosyaları
+.DS_Store
+Thumbs.db
+
+# Env
+.env
