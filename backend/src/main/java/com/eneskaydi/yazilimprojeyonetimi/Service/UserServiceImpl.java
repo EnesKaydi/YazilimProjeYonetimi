@@ -2,6 +2,7 @@ package com.eneskaydi.yazilimprojeyonetimi.Service;
 
 import com.eneskaydi.yazilimprojeyonetimi.Dto.UserDto;
 import com.eneskaydi.yazilimprojeyonetimi.Dto.UserProfileUpdateDto;
+import com.eneskaydi.yazilimprojeyonetimi.Dto.PasswordChangeRequestDto;
 import com.eneskaydi.yazilimprojeyonetimi.Entity.User;
 import com.eneskaydi.yazilimprojeyonetimi.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -59,19 +60,59 @@ public class UserServiceImpl implements UserService {
     public UserDto updateCurrentUserProfile(UserProfileUpdateDto userProfileUpdateDto) {
         User user = getAuthenticatedUser();
 
+        // E-posta güncellemesi
         if (userProfileUpdateDto.getEmail() != null && !userProfileUpdateDto.getEmail().isEmpty()) {
-            if (userRepository.existsByEmailAndIdNot(userProfileUpdateDto.getEmail(), user.getId())) {
-                throw new RuntimeException("Bu e-posta adresi zaten kullanımda: " + userProfileUpdateDto.getEmail());
+            if (!userProfileUpdateDto.getEmail().equals(user.getEmail())) { // Sadece e-posta değişmişse kontrol et
+                if (userRepository.existsByEmailAndIdNot(userProfileUpdateDto.getEmail(), user.getId())) {
+                    throw new RuntimeException("Bu e-posta adresi zaten kullanımda: " + userProfileUpdateDto.getEmail());
+                }
+                user.setEmail(userProfileUpdateDto.getEmail());
             }
-            user.setEmail(userProfileUpdateDto.getEmail());
         }
 
+        // Şifre güncellemesi (Dikkat: Bu genellikle ayrı bir işlem olmalı)
+        // Eğer şifre alanı DTO'da dolu gelirse güncelle.
         if (userProfileUpdateDto.getPassword() != null && !userProfileUpdateDto.getPassword().isEmpty()) {
-            user.setPassword(userProfileUpdateDto.getPassword()); // Geçici: Düz metin şifre ataması
+            // Burada da encode işlemi yapılmalı, şimdilik düz metin.
+            user.setPassword(userProfileUpdateDto.getPassword());
+        }
+
+        // Telefon numarası güncellemesi
+        if (userProfileUpdateDto.getPhoneNumber() != null) { // Boş string de gelebilir, kontrol edilebilir.
+            user.setPhoneNumber(userProfileUpdateDto.getPhoneNumber());
+        }
+
+        // Adres güncellemesi
+        if (userProfileUpdateDto.getAddress() != null) { // Boş string de gelebilir, kontrol edilebilir.
+            user.setAddress(userProfileUpdateDto.getAddress());
         }
 
         User updatedUser = userRepository.save(user);
         return mapToUserDto(updatedUser);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(PasswordChangeRequestDto requestDto) {
+        // Yeni şifre ve teyit şifresinin eşleşip eşleşmediğini kontrol et.
+        if (!requestDto.getNewPassword().equals(requestDto.getConfirmNewPassword())) {
+            throw new RuntimeException("Yeni şifre ve yeni şifre tekrarı eşleşmiyor.");
+        }
+
+        // Kullanıcıyı ID ile veritabanından bul.
+        User user = getAuthenticatedUser();
+
+        // Mevcut şifrenin doğruluğunu kontrol et (Gerçek uygulamada passwordEncoder.matches kullanılmalı).
+        // Şimdilik düz metin karşılaştırması yapılıyor, GÜVENLİK AÇIĞI!
+        if (!user.getPassword().equals(requestDto.getCurrentPassword())) {
+            throw new RuntimeException("Mevcut şifre yanlış.");
+        }
+
+        // Yeni şifreyi ayarla (Gerçek uygulamada passwordEncoder.encode kullanılmalı).
+        user.setPassword(requestDto.getNewPassword());
+
+        // Kullanıcıyı güncelle.
+        userRepository.save(user);
     }
 
     // User entity'sini UserDto'ya mapleyen yardımcı metot

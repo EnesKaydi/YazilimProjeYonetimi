@@ -14,20 +14,17 @@ import java.util.List;
 public interface IncomeRecordService {
 
         /**
-         * Belirli bir sahip ve bütçe yılı için yeni bir gelir kaydı oluşturur.
+         * Belirli bir mülk ve bütçe yılı için yeni bir gelir kaydı oluşturur.
          *
          * @param propertyId            Mülkün ID'si.
          * @param budgetYearId          Gelir kaydının ait olduğu bütçe yılının ID'si.
-         * @param ownerId               Gelir kaydının ilişkili olduğu mülk sahibinin
-         *                              (Owner) ID'si.
          * @param incomeRecordCreateDto Oluşturulacak gelir kaydı bilgilerini içeren
          *                              DTO.
          * @return Oluşturulan gelir kaydı bilgilerini içeren DTO.
          * @throws RuntimeException Mülk, bütçe yılı, sahip bulunamazsa veya ilgili ay
          *                          için zaten bir kayıt varsa.
          */
-        IncomeRecordDto createIncomeRecord(Long propertyId, Long budgetYearId, Long ownerId,
-                        IncomeRecordCreateDto incomeRecordCreateDto);
+        IncomeRecordDto createIncomeRecord(Long propertyId, Long budgetYearId, IncomeRecordCreateDto incomeRecordCreateDto);
 
         /**
          * Belirli bir bütçe yılındaki tüm gelir kayıtlarını listeler (tüm sahipler
@@ -39,17 +36,6 @@ public interface IncomeRecordService {
          * @throws RuntimeException Mülk veya bütçe yılı bulunamazsa.
          */
         List<IncomeRecordDto> getIncomeRecordsByBudgetYear(Long propertyId, Long budgetYearId);
-
-        /**
-         * Belirli bir bütçe yılı ve belirli bir sahip için gelir kayıtlarını listeler.
-         *
-         * @param propertyId   Mülkün ID'si.
-         * @param budgetYearId Bütçe yılının ID'si.
-         * @param ownerId      Sahip (Owner) ID'si.
-         * @return Belirtilen sahip ve bütçe yılına ait gelir kayıtlarının listesi.
-         * @throws RuntimeException Mülk, bütçe yılı veya sahip bulunamazsa.
-         */
-        List<IncomeRecordDto> getIncomeRecordsByOwnerAndBudgetYear(Long propertyId, Long budgetYearId, Long ownerId);
 
         /**
          * Belirli bir gelir kaydını ID'sine göre getirir.

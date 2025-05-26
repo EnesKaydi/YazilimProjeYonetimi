@@ -2,6 +2,7 @@ package com.eneskaydi.yazilimprojeyonetimi.Service;
 
 import com.eneskaydi.yazilimprojeyonetimi.Dto.UserDto;
 import com.eneskaydi.yazilimprojeyonetimi.Dto.UserProfileUpdateDto;
+import com.eneskaydi.yazilimprojeyonetimi.Dto.PasswordChangeRequestDto;
 import org.springframework.transaction.annotation.Transactional;
 
 // Kullanıcı yönetimi ve profil işlemlerinden sorumlu servis arayüzü.
@@ -28,6 +29,14 @@ public interface UserService {
      *                          bulunamazsa.
      */
     UserDto updateCurrentUserProfile(UserProfileUpdateDto userProfileUpdateDto);
+
+    /**
+     * Mevcut kullanıcının şifresini değiştirir.
+     *
+     * @param requestDto Şifre değişikliği bilgilerini içeren DTO.
+     * @throws RuntimeException Mevcut şifre yanlışsa, yeni şifreler eşleşmiyorsa vb.
+     */
+    void changePassword(PasswordChangeRequestDto requestDto);
 
     // Rol bazlı yetkilendirme ve diğer kullanıcı yönetimi fonksiyonları için örnek
     // metot imzaları:

@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
+// Varsayılan ID'ler - normalde giriş yapmış kullanıcıdan veya URL'den gelir
+const DEFAULT_PROPERTY_ID = 1; 
+const DEFAULT_OWNER_ID = 1; // Bu ID, User ID 1'e karşılık gelen Owner kaydının ID'si olmalı
+
 export default function OwnerDetailsModule() {
   const { translations: t } = useLanguage();
   
@@ -233,213 +237,389 @@ export default function OwnerDetailsModule() {
     return unitType ? unitType.name : '';
   };
   
+  // Profil Bilgileri Form State
+  const [profileData, setProfileData] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    bankAccountNumber: '', // Formda yok ama DTO'da var, gerekirse eklenir
+    deedPollNumber: '',    // Formda yok ama DTO'da var, gerekirse eklenir
+    isTenantOccupied: false,
+    displayAs: 'MAL_SAHIBI', // 'MAL_SAHIBI' or 'KIRACI'
+    unitTypeId: '', // Güncelleme için gerekli, fetch ile gelecek
+    // tenantDetails: null // Gerekirse TenantUpdateDto yapısında olacak
+  });
+
+  // Şifre Değiştirme Form State
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
+  });
+
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [profileError, setProfileError] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
+  const [profileSuccessMessage, setProfileSuccessMessage] = useState('');
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('');
+
+  // API'den profil bilgilerini çekmek için
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setLoadingProfile(true);
+      setProfileError(null);
+      try {
+        // const token = localStorage.getItem('token'); // Token varsa
+        const response = await fetch(`/api/properties/${DEFAULT_PROPERTY_ID}/owners/${DEFAULT_OWNER_ID}`, {
+          // headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to fetch profile data. Status: ${response.status}`);
+        }
+        const data = await response.json(); // Bu OwnerDto olmalı
+        setProfileData({
+          fullName: data.fullName || '',
+          email: data.email || '',
+          phoneNumber: data.phoneNumber || '',
+          address: data.address || '',
+          bankAccountNumber: data.bankAccountNumber || '',
+          deedPollNumber: data.deedPollNumber || '',
+          isTenantOccupied: data.isTenantOccupied || false,
+          displayAs: data.displayAs || 'MAL_SAHIBI',
+          unitTypeId: data.unitTypeId || '', // Bu çok önemli
+          // tenantDetails: data.tenantDetails // Eğer varsa ve güncellenecekse
+        });
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+        setProfileError(error.message);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  const handleProfileInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setProfileSuccessMessage('');
+    setProfileError('');
+    if (type === 'checkbox') {
+      if (name === 'isTenantOccupied') {
+        setProfileData(prev => ({
+          ...prev,
+          isTenantOccupied: checked,
+          // Eğer kiracı yoksa ve "isTenantOccupied" false yapılıyorsa, displayAs MAL_SAHIBI olmalı
+          // Eğer "isTenantOccupied" true yapılıyorsa, displayAs KIRACI olabilir (başka bir UI elemanı ile seçilebilir)
+          // Şimdilik displayAs'ı isTenantOccupied'a göre basitçe ayarlayalım
+          displayAs: checked ? 'KIRACI' : 'MAL_SAHIBI' // Bu mantık gözden geçirilmeli, UI'da displayAs için ayrı kontrol olabilir
+        }));
+      } else {
+         // Başka checkbox'lar varsa (örneğin showRenterInSystem gibi bir şey olsaydı)
+         // Bu örnekte Profile Management sayfasında doğrudan displayAs için bir checkbox yok
+         // Ama backend DTO'sunda displayAs var.
+         // isTenantOccupied ile displayAs arasındaki ilişkiyi kuruyoruz.
+      }
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordSuccessMessage('');
+    setPasswordError('');
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setProfileError(null);
+    setProfileSuccessMessage('');
+
+    // Temel frontend validasyonu (opsiyonel, backend zaten yapıyor)
+    if (!profileData.fullName || !profileData.email) {
+      setProfileError(t.fillRequiredFields || 'Lütfen tüm zorunlu alanları doldurun.');
+      return;
+    }
+    if (!profileData.unitTypeId) {
+        setProfileError('Birim türü ID\'si eksik. Profil verileri tam yüklenememiş olabilir.');
+        return;
+    }
+
+    const payload = {
+      fullName: profileData.fullName,
+      address: profileData.address,
+      phoneNumber: profileData.phoneNumber,
+      email: profileData.email,
+      bankAccountNumber: profileData.bankAccountNumber,
+      deedPollNumber: profileData.deedPollNumber,
+      isTenantOccupied: profileData.isTenantOccupied,
+      displayAs: profileData.displayAs, // Bu, isTenantOccupied'a göre ayarlanmıştı
+      unitTypeId: profileData.unitTypeId, // Başlangıçta fetch edilen unitTypeId
+      // tenantDetails: profileData.isTenantOccupied ? (profileData.tenantDetails || null) : null, // Eğer tenant formu varsa
+    };
+
+    try {
+      // const token = localStorage.getItem('token');
+      const response = await fetch(`/api/properties/${DEFAULT_PROPERTY_ID}/owners/${DEFAULT_OWNER_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Profil güncellenemedi. Status: ${response.status}`);
+      }
+      const updatedData = await response.json();
+      setProfileSuccessMessage(t.profileUpdatedSuccess || 'Profil başarıyla güncellendi!');
+      // İsteğe bağlı: Güncellenmiş veriyi tekrar state'e set et
+      setProfileData({
+        fullName: updatedData.fullName || '',
+        email: updatedData.email || '',
+        phoneNumber: updatedData.phoneNumber || '',
+        address: updatedData.address || '',
+        bankAccountNumber: updatedData.bankAccountNumber || '',
+        deedPollNumber: updatedData.deedPollNumber || '',
+        isTenantOccupied: updatedData.isTenantOccupied || false,
+        displayAs: updatedData.displayAs || 'MAL_SAHIBI',
+        unitTypeId: updatedData.unitTypeId || '',
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setProfileError(error.message);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError(null);
+    setPasswordSuccessMessage('');
+
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      setPasswordError(t.passwordsDoNotMatch || 'Yeni şifreler eşleşmiyor.');
+      return;
+    }
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      setPasswordError(t.fillAllPasswordFields || 'Lütfen tüm şifre alanlarını doldurun.');
+      return;
+    }
+    
+    const payload = {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+        confirmNewPassword: passwordData.confirmNewPassword,
+    };
+
+    try {
+    //   const token = localStorage.getItem('token');
+      const response = await fetch('/api/users/me/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        //   'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      const responseText = await response.text(); // Backend string döndürüyor
+      if (!response.ok) {
+        // Backend hata durumunda da JSON yerine string dönebilir, veya JSON dönebilir
+        // Hata mesajını responseText'ten veya response.json() ile almaya çalışalım
+        let errorMessage = responseText;
+        try {
+            const errorJson = JSON.parse(responseText); // Eğer JSON ise
+            errorMessage = errorJson.message || responseText;
+        } catch (parseError) {
+            // JSON değilse, responseText'i kullan
+        }
+        throw new Error(errorMessage || `Şifre değiştirilemedi. Status: ${response.status}`);
+      }
+      setPasswordSuccessMessage(responseText || (t.passwordChangedSuccess || 'Şifre başarıyla değiştirildi!'));
+      setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' }); // Formu temizle
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordError(error.message);
+    }
+  };
+  
+  if (loadingProfile) {
+    return <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>;
+  }
+
   return (
-    <div className="owner-details-module">
-      <div className="card border-0 shadow-sm mb-4">
-        <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-          <h5 className="card-title mb-0">{t.ownerDetails}</h5>
+    <div className="profile-management-module container py-4"> {/* Daha genel bir class adı */}
+      <h3 className="mb-4">{t.profileManagement || 'Profile Management'}</h3>
+      
+      {/* Personal Information Form */}
+      <div className="card shadow-sm mb-4">
+        <div className="card-header">
+          <h5 className="mb-0">{t.personalInformation || 'Personal Information'}</h5>
         </div>
         <div className="card-body">
-          {isAdding && (
-            <div className="mb-4 p-3 border rounded bg-light">
-              <h6 className="mb-3">{isEditing ? t.editOwner : t.addNewOwner}</h6>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label htmlFor="ownerFullName" className="form-label">{t.fullName}</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    id="ownerFullName" 
-                    name="fullName"
-                    value={currentOwner.fullName}
-                    onChange={handleOwnerInputChange}
-                    required
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="ownerUnitType" className="form-label">{t.unitType || 'Unit Type'}</label>
-                  <select 
-                    className="form-select" 
-                    id="ownerUnitType" 
-                    name="unitTypeId"
-                    value={currentOwner.unitTypeId}
-                    onChange={handleOwnerInputChange}
-                    required
-                  >
-                    <option value="">{t.select}</option>
-                    {unitTypes.map(unitType => (
-                      <option key={unitType.id} value={unitType.id}>{unitType.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="ownerTitleNumber" className="form-label">{t.titleNumber || 'Title Number'}</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    id="ownerTitleNumber" 
-                    name="titleNumber"
-                    value={currentOwner.titleNumber}
-                    onChange={handleOwnerInputChange}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="ownerAddress" className="form-label">{t.address}</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    id="ownerAddress" 
-                    name="address"
-                    value={currentOwner.address}
-                    onChange={handleOwnerInputChange}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="ownerPhone" className="form-label">{t.phone || 'Phone'}</label>
-                  <input 
-                    type="tel" 
-                    className="form-control" 
-                    id="ownerPhone" 
-                    name="phone"
-                    value={currentOwner.phone}
-                    onChange={handleOwnerInputChange}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="ownerEmail" className="form-label">{t.email}</label>
-                  <input 
-                    type="email" 
-                    className="form-control" 
-                    id="ownerEmail" 
-                    name="email"
-                    value={currentOwner.email}
-                    onChange={handleOwnerInputChange}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label htmlFor="ownerBankAccount" className="form-label">{t.bankAccount || 'Bank Account'}</label>
-                  <input 
-                    type="text" 
-                    className="form-control" 
-                    id="ownerBankAccount" 
-                    name="bankAccount"
-                    value={currentOwner.bankAccount}
-                    onChange={handleOwnerInputChange}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <div className="form-check mt-4">
+          <form onSubmit={handleUpdateProfile}>
+            {profileError && <div className="alert alert-danger">{profileError}</div>}
+            {profileSuccessMessage && <div className="alert alert-success">{profileSuccessMessage}</div>}
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label htmlFor="fullName" className="form-label">{t.fullName || 'Full Name'}</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="fullName"
+                  name="fullName"
+                  value={profileData.fullName}
+                  onChange={handleProfileInputChange}
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="email" className="form-label">{t.email || 'Email'}</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  id="email"
+                  name="email"
+                  value={profileData.email}
+                  onChange={handleProfileInputChange}
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="phoneNumber" className="form-label">{t.phone || 'Phone Number'}</label>
+                <input
+                  type="tel"
+                  className="form-control"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={profileData.phoneNumber}
+                  onChange={handleProfileInputChange}
+                />
+              </div>
+              <div className="col-md-12">
+                <label htmlFor="address" className="form-label">{t.address || 'Address'}</label>
+                <textarea
+                  className="form-control"
+                  id="address"
+                  name="address"
+                  rows="3"
+                  value={profileData.address}
+                  onChange={handleProfileInputChange}
+                ></textarea>
+              </div>
+               {/* Opsiyonel: Banka ve Tapu bilgileri için alanlar eklenebilir */}
+               {/* 
+               <div className="col-md-6">
+                <label htmlFor="bankAccountNumber" className="form-label">{t.bankAccount || 'Bank Account'}</label>
+                <input type="text" className="form-control" id="bankAccountNumber" name="bankAccountNumber" value={profileData.bankAccountNumber} onChange={handleProfileInputChange} />
+               </div>
+               <div className="col-md-6">
+                <label htmlFor="deedPollNumber" className="form-label">{t.titleNumber || 'Title/Deed Poll Number'}</label>
+                <input type="text" className="form-control" id="deedPollNumber" name="deedPollNumber" value={profileData.deedPollNumber} onChange={handleProfileInputChange} />
+               </div>
+               */}
+              <div className="col-md-6">
+                  <div className="form-check mt-3">
                     <input 
                       className="form-check-input" 
                       type="checkbox" 
-                      id="isRented" 
-                      name="isRented"
-                      checked={currentOwner.isRented}
-                      onChange={handleOwnerInputChange}
+                      id="isTenantOccupied" 
+                      name="isTenantOccupied"
+                      checked={profileData.isTenantOccupied}
+                      onChange={handleProfileInputChange}
                     />
-                    <label className="form-check-label" htmlFor="isRented">
-                      {t.isRented || 'Property is Rented'}
+                    <label className="form-check-label" htmlFor="isTenantOccupied">
+                      {t.isRented || 'Property is Rented'} 
+                      {/* t.isTenantOccupied kullanılabilir */}
                     </label>
                   </div>
-                </div>
-                
-                {currentOwner.isRented && (
-                  <div className="col-md-6">
-                    <div className="form-check mt-4">
-                      <input 
-                        className="form-check-input" 
-                        type="checkbox" 
-                        id="showRenterInSystem" 
-                        name="showRenterInSystem"
-                        checked={currentOwner.showRenterInSystem}
-                        onChange={handleOwnerInputChange}
-                      />
-                      <label className="form-check-label" htmlFor="showRenterInSystem">
-                        {t.showRenterInSystem || 'Show Renter in System (instead of Owner)'}
-                      </label>
-                    </div>
-                  </div>
-                )}
               </div>
+              {/* 
+                displayAs (MAL_SAHIBI/KIRACI) için ayrı bir kontrol eklenebilir
+                Örneğin bir dropdown veya radio button grubu.
+                Şimdilik isTenantOccupied'a göre otomatik ayarlanıyor.
+              */}
             </div>
-          )}
-
-          {owners.length > 0 ? (
-            <div className="table-responsive">
-              <table className="table table-hover">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>{t.fullName}</th>
-                    <th>{t.unitType}</th>
-                    <th>{t.titleNumber}</th>
-                    <th>{t.contact}</th>
-                    <th>{t.status}</th>
-                    <th>{t.actions}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {owners.map(owner => (
-                    <tr key={owner.id}>
-                      <td>{owner.id}</td>
-                      <td>
-                        {owner.isRented && owner.showRenterInSystem 
-                          ? <span className="text-success">{owner.renter?.fullName}</span> 
-                          : owner.fullName}
-                      </td>
-                      <td>{getUnitTypeName(owner.unitTypeId)}</td>
-                      <td>{owner.titleNumber}</td>
-                      <td>
-                        {owner.isRented && owner.showRenterInSystem 
-                          ? owner.renter?.phone || owner.renter?.email
-                          : owner.phone || owner.email}
-                      </td>
-                      <td>
-                        {owner.isRented 
-                          ? <span className="badge bg-info">{t.rented || 'Rented'}</span>
-                          : <span className="badge bg-success">{t.ownerOccupied || 'Owner Occupied'}</span>}
-                      </td>
-                      <td>
-                        <div className="btn-group">
-                          <button 
-                            className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => handleEditOwner(owner.id)}
-                            title={t.edit || 'Edit'}
-                          >
-                            <i className="bi bi-pencil me-1"></i> {t.edit || 'Edit'}
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-outline-secondary me-2"
-                            onClick={() => handleDuplicateOwner(owner.id)}
-                            title={t.duplicate || 'Duplicate'}
-                          >
-                            <i className="bi bi-copy me-1"></i> {t.duplicate || 'Duplicate'}
-                          </button>
-                          <button 
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleDeleteOwner(owner.id)}
-                            title={t.delete || 'Delete'}
-                          >
-                            <i className="bi bi-trash me-1"></i> {t.delete || 'Delete'}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center py-5">
-              <div className="mb-4">
-                <i className="bi bi-people fs-1 text-muted"></i>
-              </div>
-              <h5 className="text-muted">{t.noOwnersYet || 'No owners added yet'}</h5>
-              <p className="text-muted">{t.addOwnersDescription || 'Add property owners to manage their information'}</p>
-            </div>
-          )}
+            <button type="submit" className="btn btn-primary mt-3">
+              {t.updateProfile || 'Update Profile'}
+            </button>
+          </form>
         </div>
       </div>
+
+      {/* Change Password Form */}
+      <div className="card shadow-sm">
+        <div className="card-header">
+          <h5 className="mb-0">{t.changePassword || 'Change Password'}</h5>
+        </div>
+        <div className="card-body">
+          <form onSubmit={handleChangePassword}>
+            {passwordError && <div className="alert alert-danger">{passwordError}</div>}
+            {passwordSuccessMessage && <div className="alert alert-success">{passwordSuccessMessage}</div>}
+            <div className="mb-3">
+              <label htmlFor="currentPassword"className="form-label">{t.currentPassword || 'Current Password'}</label>
+              <input
+                type="password"
+                className="form-control"
+                id="currentPassword"
+                name="currentPassword"
+                value={passwordData.currentPassword}
+                onChange={handlePasswordInputChange}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="newPassword"className="form-label">{t.newPassword || 'New Password'}</label>
+              <input
+                type="password"
+                className="form-control"
+                id="newPassword"
+                name="newPassword"
+                value={passwordData.newPassword}
+                onChange={handlePasswordInputChange}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="confirmNewPassword"className="form-label">{t.confirmNewPassword || 'Confirm New Password'}</label>
+              <input
+                type="password"
+                className="form-control"
+                id="confirmNewPassword"
+                name="confirmNewPassword"
+                value={passwordData.confirmNewPassword}
+                onChange={handlePasswordInputChange}
+                required
+              />
+            </div>
+            <button type="submit" className="btn btn-primary">
+              {t.changePasswordBtn || 'Change Password'}
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      {/* 
+        Owner Listesi ve Ekleme/Düzenleme Formu (Mevcut OwnerDetailsModule'den)
+        Bu kısım şimdilik bu isteğin ana odağı dışındadır.
+        İhtiyaç duyulursa bu kısım da ayrıca ele alınabilir.
+      */}
+      {/* 
+      <div className="card border-0 shadow-sm mb-4 mt-5">
+        // ... (Mevcut owner listesi yönetimi için olan başlık ve butonlar) ...
+      </div> 
+      */}
+
     </div>
   );
 }

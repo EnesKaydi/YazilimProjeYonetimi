@@ -13,9 +13,8 @@ import java.time.LocalDate; // Ödeme tarihi için LocalDate daha uygun
 // Database_Prd.md [cite: 22, 23, 24, 25, 26, 27, 28] gereksinimlerine göre.
 @Entity
 @Table(name = "income_records", uniqueConstraints = {
-        // Bir sahip için belirli bir bütçe yılında, belirli bir ay için sadece bir
-        // gelir kaydı olmalı.
-        @UniqueConstraint(columnNames = { "owner_id", "budget_year_id", "month" })
+    // Bir bütçe yılında, belirli bir ay için sadece bir gelir kaydı olmalı.
+    @UniqueConstraint(columnNames = { "budget_year_id", "month" })
 })
 @Data
 @NoArgsConstructor
@@ -25,11 +24,6 @@ public class IncomeRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Kayıt ID
-
-    // Bu gelir kaydının ait olduğu sahip (Owner).
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private Owner owner; // İlişkili sahip
 
     // Bu gelir kaydının ait olduğu bütçe yılı (BudgetYear).
     @ManyToOne(fetch = FetchType.LAZY)
