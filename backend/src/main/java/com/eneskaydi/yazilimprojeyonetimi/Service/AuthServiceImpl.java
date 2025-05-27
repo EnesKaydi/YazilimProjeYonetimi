@@ -74,8 +74,7 @@ public class AuthServiceImpl implements AuthService {
                 user.getId(),
                 user.getUsername(), // Ad Soyad
                 user.getEmail(),
-                user.getRole()
-        );
+                user.getRole());
     }
 
     @Override

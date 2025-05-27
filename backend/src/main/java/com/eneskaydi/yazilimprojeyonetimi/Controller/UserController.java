@@ -45,8 +45,6 @@ public class UserController {
     @PutMapping("/me")
     public ResponseEntity<UserDto> updateCurrentUserProfile(
             @Valid @RequestBody UserProfileUpdateDto userProfileUpdateDto) {
-        // TODO: UserProfileUpdateDto'nun User entity'sine eklenen address ve phoneNumber alanlarını içermesi ve
-        // UserServiceImpl.updateCurrentUserProfile metodunun bu alanları işlemesi gerekir.
         UserDto updatedUserDto = userService.updateCurrentUserProfile(userProfileUpdateDto);
         return ResponseEntity.ok(updatedUserDto);
     }

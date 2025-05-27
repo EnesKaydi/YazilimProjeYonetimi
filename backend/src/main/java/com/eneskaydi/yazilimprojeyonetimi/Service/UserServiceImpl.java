@@ -60,6 +60,16 @@ public class UserServiceImpl implements UserService {
     public UserDto updateCurrentUserProfile(UserProfileUpdateDto userProfileUpdateDto) {
         User user = getAuthenticatedUser();
 
+        // Tam ad (username) güncellemesi
+        if (userProfileUpdateDto.getFullName() != null && !userProfileUpdateDto.getFullName().isEmpty()) {
+            // Kullanıcı adının (username) benzersiz olup olmadığını kontrol et, ancak kendi kullanıcı adı hariç.
+            // Not: User entity'sinde username unique. Eğer başka bir kullanıcı bu username'i zaten kullanıyorsa hata fırlat.
+            if (!userProfileUpdateDto.getFullName().equals(user.getUsername()) && userRepository.existsByUsernameAndIdNot(userProfileUpdateDto.getFullName(), user.getId())) {
+                throw new RuntimeException("Bu kullanıcı adı zaten kullanımda: " + userProfileUpdateDto.getFullName());
+            }
+            user.setUsername(userProfileUpdateDto.getFullName());
+        }
+
         // E-posta güncellemesi
         if (userProfileUpdateDto.getEmail() != null && !userProfileUpdateDto.getEmail().isEmpty()) {
             if (!userProfileUpdateDto.getEmail().equals(user.getEmail())) { // Sadece e-posta değişmişse kontrol et
@@ -68,13 +78,6 @@ public class UserServiceImpl implements UserService {
                 }
                 user.setEmail(userProfileUpdateDto.getEmail());
             }
-        }
-
-        // Şifre güncellemesi (Dikkat: Bu genellikle ayrı bir işlem olmalı)
-        // Eğer şifre alanı DTO'da dolu gelirse güncelle.
-        if (userProfileUpdateDto.getPassword() != null && !userProfileUpdateDto.getPassword().isEmpty()) {
-            // Burada da encode işlemi yapılmalı, şimdilik düz metin.
-            user.setPassword(userProfileUpdateDto.getPassword());
         }
 
         // Telefon numarası güncellemesi
@@ -122,6 +125,8 @@ public class UserServiceImpl implements UserService {
         userDto.setUsername(user.getUsername());
         userDto.setEmail(user.getEmail());
         userDto.setRole(user.getRole());
+        userDto.setPhoneNumber(user.getPhoneNumber());
+        userDto.setAddress(user.getAddress());
         return userDto;
     }
 }

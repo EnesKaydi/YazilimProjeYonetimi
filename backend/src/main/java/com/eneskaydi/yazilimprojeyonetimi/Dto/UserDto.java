@@ -15,6 +15,8 @@ public class UserDto {
     private String username; // Bu alan User entity'sindeki username'i (Ad Soyad) temsil eder.
     private String email;
     private String role;
+    private String phoneNumber;
+    private String address;
 
     // Entity'den DTO'ya dönüşüm için bir yardımcı metot veya MapStruct gibi bir
     // kütüphane kullanılabilir.

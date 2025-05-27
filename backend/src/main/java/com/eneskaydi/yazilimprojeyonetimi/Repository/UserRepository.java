@@ -25,4 +25,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // kullanılıp kullanılmadığını kontrol eder.
     // Profil güncelleme sırasında e-posta değişikliği için kullanışlıdır.
     boolean existsByEmailAndIdNot(String email, Long userId);
+
+    // Belirli bir ID hariç, verilen kullanıcı adının başka bir kullanıcı tarafından
+    // kullanılıp kullanılmadığını kontrol eder.
+    // Profil güncelleme sırasında kullanıcı adı (tam ad) değişikliği için kullanışlıdır.
+    boolean existsByUsernameAndIdNot(String username, Long userId);
 }

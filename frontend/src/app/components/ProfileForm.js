@@ -1,20 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function ProfileForm() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, token } = useAuth();
   const { translations: t } = useLanguage();
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
   
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || '',
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
   });
   
   const [passwordData, setPasswordData] = useState({
@@ -22,6 +23,35 @@ export default function ProfileForm() {
     newPassword: '',
     confirmNewPassword: '',
   });
+  
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      setProfileLoading(true);
+      try {
+        const response = await fetch('/api/users/me', {
+          headers: {
+            'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+          }
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Failed to load profile data.' }));
+          throw new Error(errorData.message || 'Failed to load profile data.');
+        }
+        const data = await response.json();
+        setFormData({
+          fullName: data.username || '',
+          email: data.email || '',
+          phoneNumber: data.phoneNumber || '',
+          address: data.address || '',
+        });
+      } catch (error) {
+        setMessage({ type: 'danger', text: error.message || 'Could not load profile information.' });
+      }
+      setProfileLoading(false);
+    };
+
+    fetchUserProfile();
+  }, [token, t]);
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,101 +74,106 @@ export default function ProfileForm() {
     setLoading(true);
     setMessage({ type: '', text: '' });
     
+    const profileDataToSend = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        address: formData.address,
+    };
+
     try {
-      // BACKEND CONNECTION NEEDED: Update user profile
-      // const response = await fetch('/api/users/profile', {
-      //   method: 'PUT',
-      //   headers: { 
-      //     'Content-Type': 'application/json',
-      //     'Authorization': `Bearer ${localStorage.getItem('token')}`
-      //   },
-      //   body: JSON.stringify(formData)
-      // });
-      // 
-      // const data = await response.json();
-      // if (data.success) {
-      //   // Update the user in context/localStorage
-      //   if (updateUser) {
-      //     updateUser({
-      //       ...user,
-      //       ...formData
-      //     });
-      //   }
-      //   
-      //   setMessage({ 
-      //     type: 'success', 
-      //     text: t.profileUpdated || 'Profile updated successfully' 
-      //   });
-      // } else {
-      //   setMessage({ 
-      //     type: 'danger', 
-      //     text: data.message || 'Failed to update profile' 
-      //   });
-      // }
-      
-      // For demo purposes only (remove in production)
-      setTimeout(() => {
-        // Update the user in context/localStorage
-        if (updateUser) {
-          updateUser({
-            ...user,
-            ...formData
-          });
-        }
-        
-        setMessage({ 
-          type: 'success', 
-          text: t.profileUpdated || 'Profile updated successfully' 
-        });
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      setMessage({ 
-        type: 'danger', 
-        text: error.message || 'An error occurred while updating profile' 
+      const response = await fetch('/api/users/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(profileDataToSend)
       });
-      setLoading(false);
+
+      const responseData = await response.json();
+
+      if (response.ok) {
+        if (updateUser) {
+            updateUser({
+                ...user,
+                username: responseData.username,
+                email: responseData.email,
+                phoneNumber: responseData.phoneNumber,
+                address: responseData.address,
+            });
+        }
+        setMessage({
+          type: 'success',
+          text: t.profileUpdated || 'Profile updated successfully'
+        });
+      } else {
+        setMessage({
+          type: 'danger',
+          text: responseData.message || 'Failed to update profile'
+        });
+      }
+    } catch (error) {
+      setMessage({
+        type: 'danger',
+        text: error.message || 'An error occurred while updating profile'
+      });
+    } finally {
+        setLoading(false);
     }
   };
   
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', text: '' });
-    
-    // Basic validation
+
     if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-      setMessage({ 
-        type: 'danger', 
-        text: t.passwordsNotMatch || 'Passwords do not match' 
-      });
-      setLoading(false);
+      setMessage({ type: 'danger', text: t.passwordsNotMatch || 'Passwords do not match' });
       return;
     }
-    
+    setLoading(true);
+    setMessage({ type: '', text: '' });
+
     try {
-      // In a real app, you would make an API call here
-      // For demo purposes, we'll just simulate a successful update
-      setTimeout(() => {
-        setMessage({ 
-          type: 'success', 
-          text: t.passwordChanged || 'Password changed successfully' 
+      const response = await fetch('/api/users/me/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token || localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(passwordData)
+      });
+
+      if (response.ok) {
+        const responseText = await response.text();
+        setMessage({
+          type: 'success',
+          text: responseText || t.passwordChanged || 'Password changed successfully'
         });
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmNewPassword: '',
         });
-        setLoading(false);
-      }, 1000);
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to change password.' }));
+        setMessage({
+          type: 'danger',
+          text: errorData.message || 'Failed to change password'
+        });
+      }
     } catch (error) {
-      setMessage({ 
-        type: 'danger', 
-        text: error.message || 'An error occurred while changing password' 
+      setMessage({
+        type: 'danger',
+        text: error.message || 'An error occurred while changing password'
       });
-      setLoading(false);
+    } finally {
+        setLoading(false);
     }
   };
+  
+  if (profileLoading) {
+    return <div className="text-center p-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>;
+  }
   
   return (
     <div className="row">
@@ -162,13 +197,13 @@ export default function ProfileForm() {
           <div className="card-body">
             <form onSubmit={handleProfileSubmit}>
               <div className="mb-3">
-                <label htmlFor="name" className="form-label">{t.fullName}</label>
+                <label htmlFor="fullName" className="form-label">{t.fullName}</label>
                 <input
                   type="text"
                   className="form-control"
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="fullName"
+                  name="fullName"
+                  value={formData.fullName}
                   onChange={handleInputChange}
                   required
                 />
@@ -188,13 +223,13 @@ export default function ProfileForm() {
               </div>
               
               <div className="mb-3">
-                <label htmlFor="phone" className="form-label">{t.phoneNumber}</label>
+                <label htmlFor="phoneNumber" className="form-label">{t.phoneNumber}</label>
                 <input
                   type="tel"
                   className="form-control"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
                   onChange={handleInputChange}
                 />
               </div>
