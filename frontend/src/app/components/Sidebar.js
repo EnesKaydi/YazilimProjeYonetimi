@@ -71,8 +71,17 @@ export default function Sidebar() {
             
             {expandedMenu === 'ayarlar' && (
               <div className="ms-4 mt-1">
-                <Link href="#" className="nav-link text-white-50 py-2 ps-4 d-block">
-                  <i className="bi bi-cloud-arrow-up me-2"></i> {t.backup}
+                <Link href="#" 
+                  onClick={() => alert(t.backupComplete || 'yedeklendi')} 
+                  className="nav-link text-white-50 py-2 ps-4 d-block"
+                >
+                  <i className="bi bi-cloud-arrow-up me-2"></i> {t.backup} 
+                </Link>
+                <Link href="#" 
+                  onClick={() => alert(t.restoreComplete || 'geri alındı')} 
+                  className="nav-link text-white-50 py-2 ps-4 d-block mt-1"
+                >
+                  <i className="bi bi-cloud-arrow-down me-2"></i> {t.restore || 'Restore'}
                 </Link>
               </div>
             )}

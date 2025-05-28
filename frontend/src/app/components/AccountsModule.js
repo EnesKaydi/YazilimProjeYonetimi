@@ -1,68 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function AccountsModule() {
   const { translations: t } = useLanguage();
   
   // BACKEND CONNECTION NEEDED: Fetch users from backend
-  // const [users, setUsers] = useState([]);
-  // const [loading, setLoading] = useState(true);
-  // 
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     try {
-  //       const response = await fetch('/api/users', {
-  //         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-  //       });
-  //       const data = await response.json();
-  //       
-  //       if (data.success) {
-  //         setUsers(data.users);
-  //       }
-  //     } catch (error) {
-  //       console.error('Failed to fetch users:', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   
-  //   fetchUsers();
-  // }, []);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   
-  const [users, setUsers] = useState([
-    { 
-      id: 1, 
-      name: 'Admin User', 
-      email: 'admin@example.com', 
-      role: 'admin',
-      phone: '+1 555-123-4567',
-      address: '123 Admin St, City',
-      lastLogin: '2023-10-15 14:30',
-      status: 'active'
-    },
-    { 
-      id: 2, 
-      name: 'John Doe', 
-      email: 'john@example.com', 
-      role: 'manager',
-      phone: '+1 555-987-6543',
-      address: '456 Manager Ave, Town',
-      lastLogin: '2023-10-14 09:15',
-      status: 'active'
-    },
-    { 
-      id: 3, 
-      name: 'Jane Smith', 
-      email: 'jane@example.com', 
-      role: 'user',
-      phone: '+1 555-567-8901',
-      address: '789 User Blvd, Village',
-      lastLogin: '2023-10-10 16:45',
-      status: 'inactive'
-    }
-  ]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true); // Set loading true at the beginning of fetch
+      try {
+        const response = await fetch('/api/added-users', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+          setUsers(data); 
+        } else {
+          console.error('Failed to fetch users:', data.message || 'Unknown error');
+          setUsers([]); // Set to empty array on error to avoid issues
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        setUsers([]); // Set to empty array on error
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUsers();
+  }, []);
   
   const [expandedUser, setExpandedUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -71,8 +43,9 @@ export default function AccountsModule() {
     id: null,
     name: '',
     email: '',
+    password: '',
     role: 'user',
-    phone: '',
+    phoneNumber: '',
     address: '',
     status: 'active'
   });
@@ -103,8 +76,9 @@ export default function AccountsModule() {
       id: null,
       name: '',
       email: '',
+      password: '',
       role: 'user',
-      phone: '',
+      phoneNumber: '',
       address: '',
       status: 'active'
     });
@@ -118,35 +92,77 @@ export default function AccountsModule() {
   };
   
   // Delete user
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = async (userId) => {
     if (confirm(t.confirmDeleteUser || 'Are you sure you want to delete this user?')) {
-      setUsers(prev => prev.filter(user => user.id !== userId));
-      if (expandedUser === userId) {
-        setExpandedUser(null);
+      try {
+        const response = await fetch(`/api/added-users/${userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        if (response.ok) {
+          setUsers(prev => prev.filter(user => user.id !== userId));
+          if (expandedUser === userId) {
+            setExpandedUser(null);
+          }
+        } else {
+          // Handle error
+          alert(t.deleteUserError || 'Failed to delete user.');
+          console.error('Failed to delete user:', await response.text());
+        }
+      } catch (error) {
+        alert(t.deleteUserError || 'Failed to delete user.');
+        console.error('Failed to delete user:', error);
       }
     }
   };
   
   // Save user (create or update)
-  const handleSaveUser = () => {
-    if (!currentUser.name || !currentUser.email) {
-      alert(t.requiredFields || 'Name and email are required');
+  const handleSaveUser = async () => {
+    if (!currentUser.name || !currentUser.email || (!isEditing && !currentUser.password)) {
+      alert(t.requiredFieldsPassword || 'Name, email, and password (for new users) are required');
       return;
     }
     
-    if (isEditing) {
-      // Update existing user
-      setUsers(prev => prev.map(user => 
-        user.id === currentUser.id ? currentUser : user
-      ));
-    } else {
-      // Create new user
-      const newId = users.length > 0 ? Math.max(...users.map(user => user.id)) + 1 : 1;
-      setUsers(prev => [...prev, { ...currentUser, id: newId, lastLogin: 'Never' }]);
-    }
+    const url = isEditing ? `/api/added-users/${currentUser.id}` : '/api/added-users';
+    const method = isEditing ? 'PUT' : 'POST';
     
-    setIsAdding(false);
-    setIsEditing(false);
+    // Exclude id and potentially password if not changed during edit
+    const { id, ...userData } = currentUser;
+    if (isEditing && !userData.password) { // Don\'t send empty password on update unless intended
+        delete userData.password;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(userData)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        if (isEditing) {
+          setUsers(prev => prev.map(user => 
+            user.id === result.id ? result : user
+          ));
+        } else {
+          setUsers(prev => [...prev, { ...result, lastLogin: 'Never' }]); // lastLogin might need adjustment based on backend DTO
+        }
+        setIsAdding(false);
+        setIsEditing(false);
+      } else {
+        // Handle error (e.g., email already exists)
+         alert(result.message || t.saveUserError || 'Failed to save user.');
+        console.error('Failed to save user:', result);
+      }
+    } catch (error) {
+      alert(t.saveUserError || 'Failed to save user.');
+      console.error('Failed to save user:', error);
+    }
   };
   
   // Cancel form
@@ -212,6 +228,20 @@ export default function AccountsModule() {
                   />
                 </div>
                 <div className="col-md-6">
+                  <label htmlFor="userPassword" className="form-label">
+                    {isEditing ? (t.newPasswordOptional || 'New Password (optional)') : (t.password || 'Password')}
+                  </label>
+                  <input 
+                    type="password" 
+                    className="form-control" 
+                    id="userPassword" 
+                    name="password"
+                    value={currentUser.password}
+                    onChange={handleInputChange}
+                    required={!isEditing}
+                  />
+                </div>
+                <div className="col-md-6">
                   <label htmlFor="userRole" className="form-label">{t.role || 'Role'}</label>
                   <select 
                     className="form-select" 
@@ -244,8 +274,8 @@ export default function AccountsModule() {
                     type="tel" 
                     className="form-control" 
                     id="userPhone" 
-                    name="phone"
-                    value={currentUser.phone}
+                    name="phoneNumber"
+                    value={currentUser.phoneNumber}
                     onChange={handleInputChange}
                   />
                 </div>

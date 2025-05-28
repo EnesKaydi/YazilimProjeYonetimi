@@ -40,7 +40,7 @@ const en = {
   removePicture: 'Remove Picture',
   personalInfo: 'Personal Information',
   phoneNumber: 'Phone Number',
-  address: 'Address',
+  addres: 'Address',
   
   // Dashboard
   welcome: 'Welcome',
@@ -210,7 +210,7 @@ const fr = {
   logout: 'Déconnexion',
   backup: 'Sauvegarde / Restauration',
   changeLanguage: 'Changer de langue',
-  
+
   // Property Modules
   propertyDetails: 'Détails de la propriété',
   unitTypes: 'Types d\'unités',
@@ -234,7 +234,7 @@ const fr = {
   removePicture: 'Supprimer la photo',
   personalInfo: 'Informations personnelles',
   phoneNumber: 'Numéro de téléphone',
-  address: 'Adresse',
+  addres: 'Adresse',
   
   // Accounts Management
   accounts: 'Comptes',
