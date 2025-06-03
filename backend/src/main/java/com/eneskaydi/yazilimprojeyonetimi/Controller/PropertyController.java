@@ -6,6 +6,7 @@ import com.eneskaydi.yazilimprojeyonetimi.Dto.PropertyUpdateDto;
 import com.eneskaydi.yazilimprojeyonetimi.Service.PropertyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PropertyController {
 
-    private final PropertyService propertyService;
+    @Autowired
+    private PropertyService propertyService;
+
+
 
     /**
      * Yeni bir mülk oluşturur.

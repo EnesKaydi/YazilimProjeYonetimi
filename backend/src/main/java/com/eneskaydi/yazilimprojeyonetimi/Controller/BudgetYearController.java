@@ -6,6 +6,7 @@ import com.eneskaydi.yazilimprojeyonetimi.Dto.BudgetYearDto;
 import com.eneskaydi.yazilimprojeyonetimi.Service.BudgetYearService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BudgetYearController {
 
-    private final BudgetYearService budgetYearService;
+    @Autowired
+    private BudgetYearService budgetYearService;
+
+
 
     /**
      * Belirli bir mülk için yeni bir yıllık bütçe oluşturur.

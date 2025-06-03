@@ -6,6 +6,7 @@ import com.eneskaydi.yazilimprojeyonetimi.Dto.PasswordChangeRequestDto;
 import com.eneskaydi.yazilimprojeyonetimi.Service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
+    @Autowired
     private final UserService userService;
+
+
 
     /**
      * Mevcut (giriş yapmış) kullanıcının profil bilgilerini getirir.

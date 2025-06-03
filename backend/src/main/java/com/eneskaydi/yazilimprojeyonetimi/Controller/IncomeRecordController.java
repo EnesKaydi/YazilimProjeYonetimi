@@ -7,6 +7,7 @@ import com.eneskaydi.yazilimprojeyonetimi.Entity.IncomeStatusType;
 import com.eneskaydi.yazilimprojeyonetimi.Service.IncomeRecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class IncomeRecordController {
 
-    private final IncomeRecordService incomeRecordService;
+    @Autowired
+    private  IncomeRecordService incomeRecordService;
+
+
 
     // Owner-specific endpoint'ler kaldırıldı çünkü Owner entity'si silindi.
     // Gelir kayıtları artık doğrudan BudgetYear ile ilişkilidir.

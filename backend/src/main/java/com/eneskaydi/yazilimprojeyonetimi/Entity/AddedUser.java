@@ -2,6 +2,7 @@ package com.eneskaydi.yazilimprojeyonetimi.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
@@ -13,6 +14,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class AddedUser {
 
     @Id

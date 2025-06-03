@@ -6,6 +6,7 @@ import com.eneskaydi.yazilimprojeyonetimi.Dto.MonthlyBudgetUpdateDto;
 import com.eneskaydi.yazilimprojeyonetimi.Service.MonthlyBudgetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,9 +23,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MonthlyBudgetController {
 
+        @Autowired
         private final MonthlyBudgetService monthlyBudgetService;
 
-        /**
+
+    /**
          * Belirli bir yıllık bütçe için yeni bir aylık bütçe kaydı oluşturur.
          *
          * @param propertyId             Mülk ID'si (URL üzerinden, yetkilendirme için

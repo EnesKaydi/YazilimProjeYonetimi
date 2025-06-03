@@ -4,6 +4,7 @@ import com.eneskaydi.yazilimprojeyonetimi.Dto.SettingsDto;
 import com.eneskaydi.yazilimprojeyonetimi.Service.SettingsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class SettingsController {
 
-    private final SettingsService settingsService;
+    @Autowired
+    private SettingsService settingsService;
+
+
 
     /**
      * Mevcut kullanıcıya ait veya sistem geneli ayarları getirir.

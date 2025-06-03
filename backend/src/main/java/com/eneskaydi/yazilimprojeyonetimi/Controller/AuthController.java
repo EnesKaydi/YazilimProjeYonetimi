@@ -7,6 +7,7 @@ import com.eneskaydi.yazilimprojeyonetimi.Dto.UserDto;
 import com.eneskaydi.yazilimprojeyonetimi.Service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
+    @Autowired
     private final AuthService authService;
 
     /**

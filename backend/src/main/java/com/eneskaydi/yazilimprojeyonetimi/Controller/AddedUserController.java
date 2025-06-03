@@ -14,12 +14,9 @@ import java.util.List;
 @RequestMapping("/api/added-users")
 public class AddedUserController {
 
-    private final AddedUserService addedUserService;
 
     @Autowired
-    public AddedUserController(AddedUserService addedUserService) {
-        this.addedUserService = addedUserService;
-    }
+    private AddedUserService addedUserService;
 
     @PostMapping
     public ResponseEntity<AddedUserDTO> createUser(@RequestBody AddedUserCreateDTO createDTO) {
