@@ -1,0 +1,4 @@
+
+edge [fontname="Helvetica", fontsize=10, arrowsize=0.7];
+/* Sınıf kutuları */
+node [shape="record", style="filled", fillcolor="#F5F5F5", fontname="Arial"];

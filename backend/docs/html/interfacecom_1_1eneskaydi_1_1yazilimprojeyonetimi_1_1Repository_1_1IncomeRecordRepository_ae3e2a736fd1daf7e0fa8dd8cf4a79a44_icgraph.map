@@ -1,0 +1,5 @@
+<map id="com.eneskaydi.yazilimprojeyonetimi.Repository.IncomeRecordRepository.findByBudgetYear" name="com.eneskaydi.yazilimprojeyonetimi.Repository.IncomeRecordRepository.findByBudgetYear">
+<area shape="rect" id="node1" title=" " alt="" coords="371,45,653,101"/>
+<area shape="rect" id="node2" href="$classcom_1_1eneskaydi_1_1yazilimprojeyonetimi_1_1Service_1_1IncomeRecordServiceImpl.html#a48037699f6e088fad185ac76a91ec26f" title=" " alt="" coords="5,5,323,61"/>
+<area shape="rect" id="node3" href="$classcom_1_1eneskaydi_1_1yazilimprojeyonetimi_1_1Service_1_1BudgetYearServiceImpl.html#ab0180e4222c827d3c86a061a8068707c" title=" " alt="" coords="27,85,301,141"/>
+</map>

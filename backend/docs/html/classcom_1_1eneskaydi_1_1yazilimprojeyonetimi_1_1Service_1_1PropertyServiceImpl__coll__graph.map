@@ -1,5 +1,8 @@
 <map id="com.eneskaydi.yazilimprojeyonetimi.Service.PropertyServiceImpl" name="com.eneskaydi.yazilimprojeyonetimi.Service.PropertyServiceImpl">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,272,133"/>
-<area shape="rect" id="Node000002" href="$interfacecom_1_1eneskaydi_1_1yazilimprojeyonetimi_1_1Service_1_1PropertyService.html" title=" " alt="" coords="5,5,272,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,59,141,93,136,93,136,59"/>
+<area shape="rect" id="node1" title=" " alt="" coords="296,375,563,569"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1eneskaydi_1_1yazilimprojeyonetimi_1_1Service_1_1PropertyService.html" title=" " alt="" coords="5,147,272,312"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1eneskaydi_1_1yazilimprojeyonetimi_1_1Repository_1_1PropertyRepository.html" title=" " alt="" coords="296,161,563,297"/>
+<area shape="rect" id="node4" title=" " alt="" coords="336,5,523,97"/>
+<area shape="rect" id="node5" href="$interfacecom_1_1eneskaydi_1_1yazilimprojeyonetimi_1_1Repository_1_1UserRepository.html" title=" " alt="" coords="587,147,853,312"/>
+<area shape="rect" id="node6" title=" " alt="" coords="639,5,801,97"/>
 </map>
